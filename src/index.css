@@ -135,6 +135,10 @@ img, video { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+   width: 100%;
+   padding: 0.7rem;
+   border-radius: var(--radius-md);
 }
 
 .btn-google:hover {
