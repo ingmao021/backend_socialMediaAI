@@ -10,16 +10,16 @@
   --bg-glass-border: rgba(255, 255, 255, 0.08);
   --bg-input: #ffffff;
 
-  --primary-400: #a78bfa;
-  --primary-500: #8b5cf6;
-  --primary-600: #7c3aed;
+  --primary-400: #8b5cf6;
+  --primary-500: #7c3aed;
+  --primary-600: #6d28d9;
   --primary-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
   --primary-gradient-hover: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
 
   --accent-400: #22d3ee;
   --accent-500: #06b6d4;
 
-  --text-primary: #f1f5f9;
+  --text-primary: #0f172a;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
