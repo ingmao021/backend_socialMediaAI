@@ -2,7 +2,7 @@
    1. CSS Custom Properties
    ======================================== */
 :root {
-  --bg-primary: #0a0a1a;
+  --bg-primary: #f8fafc;
   --bg-secondary: #10102a;
   --bg-elevated: #181840;
   --bg-glass: rgba(255, 255, 255, 0.04);
