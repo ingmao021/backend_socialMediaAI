@@ -74,6 +74,15 @@ export function useVideoPolling(
       try {
         const response = await videoService.getVideoStatus(videoId);
 
+        // Debug logging: muestra la respuesta completa del backend en consola
+        try {
+          // eslint-disable-next-line no-console
+          console.info('[video-poll] response for', videoId, response);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.info('[video-poll] response (string) for', videoId, String(response));
+        }
+
         if (cancelled) return;
 
         setStatus(response.status);
@@ -92,6 +101,8 @@ export function useVideoPolling(
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           const statusCode = err.response?.status;
+          // eslint-disable-next-line no-console
+          console.error('[video-poll] axios error', { videoId, statusCode, data: err.response?.data });
           if (statusCode === 404) {
             cleanup();
             setIsPolling(false);
@@ -106,13 +117,15 @@ export function useVideoPolling(
             setIsPolling(false);
             setError('Error en el servidor al consultar el estado del video. Intentá nuevamente más tarde.');
             onFailedRef.current?.('Error en el servidor al consultar el estado del video.');
-            console.error('Server error while polling video status:', err);
+            // eslint-disable-next-line no-console
+            console.error('[video-poll] Server error while polling video status:', err);
             return;
           }
         }
 
         // Otros errores de red/transitorios: loguear y seguir reintentando hasta timeout
-        console.error('Error al obtener estado del video (reintento):', err);
+        // eslint-disable-next-line no-console
+        console.error('[video-poll] transient error (will retry):', { videoId, err });
       }
     };
 

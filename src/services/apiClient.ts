@@ -11,7 +11,9 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // Asignar el token en los headers de Authorization
+    // Esto es crítico para que el backend pueda identificar al usuario
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
   return config;
 });

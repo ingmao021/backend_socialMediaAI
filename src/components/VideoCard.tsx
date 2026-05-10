@@ -1,4 +1,5 @@
 import { VideoPlayer } from './VideoPlayer';
+import { videoService } from '../services/videoService';
 import type { VideoResponse } from '../types/video.types';
 
 interface VideoCardProps {
@@ -25,9 +26,14 @@ export function VideoCard({ video, onDelete }: VideoCardProps) {
             <div className="spinner" />
             <span>Generando video…</span>
           </div>
-        ) : (
+        ) : video.status === 'FAILED' ? (
           <div className="video-card-error">
             <span>⚠️ {video.errorMessage || 'Error en la generación'}</span>
+          </div>
+        ) : (
+          // Caso cuando está COMPLETED pero sin signedUrl (debería ser muy raro due to backend)
+          <div className="video-card-error">
+            <span>⚠️ URL del video no disponible</span>
           </div>
         )}
       </div>
@@ -56,6 +62,27 @@ export function VideoCard({ video, onDelete }: VideoCardProps) {
             onClick={() => onDelete(video.id)}
           >
             Eliminar
+          </button>
+          {/* DEBUG: inspeccionar estado del video (temporal) */}
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={async () => {
+              try {
+                const status = await videoService.getVideoStatus(video.id);
+                const full = await videoService.getVideo(video.id);
+                // eslint-disable-next-line no-console
+                console.info('[inspect] video status', status);
+                // eslint-disable-next-line no-console
+                console.info('[inspect] video full', full);
+                alert(`Status: ${status.status}\nsignedUrl: ${status.signedUrl ? 'present' : 'null'}\nRevisa la consola para más detalles.`);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error('Inspect error', err);
+                alert('Error inspeccionando el video. Verifica la consola.');
+              }
+            }}
+          >
+            Inspeccionar
           </button>
         </div>
       </div>

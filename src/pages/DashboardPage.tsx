@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { getToken } from '../utils/tokenStorage';
 import { useAuth } from '../hooks/useAuth';
 import { useVideoPolling } from '../hooks/useVideoPolling';
 import { videoService } from '../services/videoService';
@@ -23,23 +24,76 @@ export function DashboardPage() {
 
   // Load video list
   const loadVideos = useCallback(
-    async (p: number = page) => {
+    async (p: number = 0) => {
       setLoadingList(true);
       try {
+        const token = getToken();
         const data = await videoService.listVideos(p, PAGE_SIZE);
+
+        // Debug: log response and token presence to help diagnose missing videos
+        try {
+          // eslint-disable-next-line no-console
+          console.info('[videos] Request details:', {
+            page: p,
+            pageSize: PAGE_SIZE,
+            tokenPresent: !!token,
+            tokenValue: token ? `${token.substring(0, 20)}...` : 'NO TOKEN',
+          });
+          // eslint-disable-next-line no-console
+          console.info('[videos] Backend response:', {
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            contentCount: data.content?.length || 0,
+            content: data.content,
+          });
+        } catch (e) {
+          // ignore logging errors
+        }
+
+        // Asegurar que se mapea correctamente response.data.content
         setVideosData(data);
-      } catch {
-        toast.error('Error al cargar los videos.');
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('[videos] Error loading videos:', error);
+
+        // Si es un error de autenticación
+        if (axios.isAxiosError(error)) {
+          const statusCode = error.response?.status;
+          const errorData = error.response?.data as ApiError | undefined;
+
+          if (statusCode === 401 || statusCode === 403) {
+            // eslint-disable-next-line no-console
+            console.error('[videos] Authentication error (401/403):', {
+              statusCode,
+              message: errorData?.message,
+              noToken: !getToken(),
+            });
+            toast.error('Error de autenticación. Por favor, inicia sesión nuevamente.');
+          } else {
+            toast.error(`Error al cargar los videos (${statusCode || 'error'})`);
+          }
+        } else {
+          toast.error('Error al cargar los videos.');
+        }
       } finally {
         setLoadingList(false);
       }
     },
-    [page],
+    [],
   );
 
   useEffect(() => {
     loadVideos(page);
   }, [page, loadVideos]);
+
+  // Recargar videos cuando el usuario cambia (después de login)
+  useEffect(() => {
+    if (user && !pollingVideoId) {
+      loadVideos(0);
+      setPage(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, pollingVideoId]);
 
   // Polling for the most recently generated video
   useVideoPolling({
