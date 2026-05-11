@@ -47,8 +47,8 @@ export function ProfilePage() {
       toast.error('Solo se aceptan imágenes JPG, PNG o WebP.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen no puede superar 5 MB.');
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('La imagen no puede superar 2 MB.');
       return;
     }
 
@@ -108,7 +108,7 @@ export function ProfilePage() {
                   )}
                 </button>
                 <span className="avatar-upload-label">
-                  JPG, PNG o WebP. Máx 5 MB.
+                  JPG, PNG o WebP. Máx 2 MB.
                 </span>
                 <input
                   ref={fileInputRef}
@@ -146,6 +146,13 @@ export function ProfilePage() {
               disabled
               style={{ opacity: 0.6 }}
             />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Cuenta vinculada</label>
+            <div style={{ color: 'var(--text-secondary)' }}>
+              {user?.hasGoogle ? '✅ Conectado con Google' : 'No conectado con Google'}
+            </div>
           </div>
 
           <div className="profile-actions">

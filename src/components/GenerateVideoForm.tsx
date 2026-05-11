@@ -4,13 +4,14 @@ import type { GenerateVideoRequest } from '../types/video.types';
 interface GenerateVideoFormProps {
   onGenerate: (request: GenerateVideoRequest) => Promise<void>;
   disabled: boolean;
-  quotaReached: boolean;
-  videosGenerated: number;
-  videosLimit: number;
+  // TODO: Reactivar propiedades de cuota
+  quotaReached?: boolean;
+  videosGenerated?: number;
+  videosLimit?: number;
 }
 
 const DURATIONS: Array<GenerateVideoRequest['durationSeconds']> = [4, 6, 8];
-const MAX_PROMPT_LENGTH = 1000;
+const MAX_PROMPT_LENGTH = 2000;
 
 export function GenerateVideoForm({
   onGenerate,

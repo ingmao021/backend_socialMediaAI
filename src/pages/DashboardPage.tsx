@@ -18,7 +18,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(0);
   const [loadingList, setLoadingList] = useState(true);
 
-  const quotaReached = false; // (user?.videosGenerated ?? 0) >= (user?.videosLimit ?? 2);
+  const quotaReached = (user?.videosGenerated ?? 0) >= (user?.videosLimit ?? 2);
 
   // Load video list
   const loadVideos = useCallback(

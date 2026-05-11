@@ -27,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = authService.getToken();
     if (token) {
-      authService
-        .getCurrentUser()
+      userService
+        .getMe()
         .then((userData) => setUser(userData))
         .catch(() => authService.clearToken())
         .finally(() => setLoading(false));
