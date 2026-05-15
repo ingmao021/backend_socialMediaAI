@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import toast from 'react-hot-toast';
@@ -14,13 +14,6 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Debug: log exact origin para validar en Google Cloud Console
-  useEffect(() => {
-    const origin = window.location.origin;
-    console.log('🔑 Google OAuth Origin:', origin);
-    console.log('📝 Este origin debe estar en Google Cloud Console > Authorized JavaScript origins');
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -84,13 +84,6 @@ export function useVideoPolling(
       try {
         const response = await videoService.getVideoStatus(videoId);
 
-        // Debug logging: muestra la respuesta completa del backend en consola
-        try {
-          console.info('[video-poll] response for', videoId, response);
-        } catch {
-          console.info('[video-poll] response (string) for', videoId, String(response));
-        }
-
         if (cancelled) return;
 
         setStatus(response.status);
@@ -103,7 +96,7 @@ export function useVideoPolling(
         } else if (response.status === 'FAILED') {
           setIsPolling(false);
           cleanup();
-          onFailedRef.current?.('La generación del video ha fallado.');
+          onFailedRef.current?.(response.errorMessage ?? 'La generación del video ha fallado.');
         }
         // If still PROCESSING, keep polling
       } catch (err: unknown) {

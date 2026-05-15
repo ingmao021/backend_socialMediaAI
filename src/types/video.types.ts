@@ -15,6 +15,7 @@ export interface VideoResponse {
 export interface VideoStatusResponse {
   status: VideoStatus;
   signedUrl: string | null;
+  errorMessage: string | null;
 }
 
 export interface GenerateVideoRequest {

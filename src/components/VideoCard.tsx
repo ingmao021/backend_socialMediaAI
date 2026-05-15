@@ -125,24 +125,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
           >
             Eliminar
           </button>
-          {/* DEBUG: inspeccionar estado del video (temporal) */}
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={async () => {
-              try {
-                const status = await videoService.getVideoStatus(currentVideo.id);
-                const full = await videoService.getVideo(currentVideo.id);
-                console.info('[inspect] video status', status);
-                console.info('[inspect] video full', full);
-                alert(`Status: ${status.status}\nsignedUrl: ${status.signedUrl ? 'present' : 'null'}\nRevisa la consola para más detalles.`);
-              } catch (err) {
-                console.error('Inspect error', err);
-                alert('Error inspeccionando el video. Verifica la consola.');
-              }
-            }}
-          >
-            Inspeccionar
-          </button>
         </div>
       </div>
     </div>

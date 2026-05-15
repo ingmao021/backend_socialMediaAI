@@ -41,10 +41,10 @@ export function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Client-side validation
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    // Client-side validation — backend only accepts PNG and JPEG, not WebP
+    const validTypes = ['image/jpeg', 'image/png'];
     if (!validTypes.includes(file.type)) {
-      toast.error('Solo se aceptan imágenes JPG, PNG o WebP.');
+      toast.error('Solo se aceptan imágenes JPG o PNG.');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -108,12 +108,12 @@ export function ProfilePage() {
                   )}
                 </button>
                 <span className="avatar-upload-label">
-                  JPG, PNG o WebP. Máx 2 MB.
+                  JPG o PNG. Máx 2 MB.
                 </span>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/jpeg,image/png"
                   className="avatar-file-input"
                   onChange={handleFileSelect}
                 />
