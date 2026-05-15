@@ -151,7 +151,7 @@ export function LoginPage() {
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => toast.error('Error al conectar con Google.')}
-            theme="filled_black"
+            theme="outline"
             size="large"
             width={320}
             text="continue_with"
