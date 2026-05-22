@@ -7,10 +7,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import App from './App';
 import './index.css';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID?.trim();
 
 if (!GOOGLE_CLIENT_ID) {
-  throw new Error('Missing VITE_GOOGLE_CLIENT_ID in environment variables.');
+  throw new Error('Missing GOOGLE_CLIENT_ID in environment variables.');
 }
 
 createRoot(document.getElementById('root')!).render(
