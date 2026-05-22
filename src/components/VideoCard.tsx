@@ -50,7 +50,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   // ── AÑADIDO: estado YouTube ──────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
   const [ytState, setYtState] = useState<YouTubeShareState>('idle');
-  const [ytProgress, setYtProgress] = useState<number | null>(null);
   const [ytUrl, setYtUrl] = useState<string | null>(null);
   const [ytError, setYtError] = useState<string | null>(null);
   const [shareTitle, setShareTitle] = useState('');
@@ -144,7 +143,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
     pollingRef.current = setInterval(async () => {
       try {
         const job = await youtubeService.getExportJob(jobId);
-        setYtProgress(job.progressPercent);
         if (job.status === 'COMPLETED') {
           clearInterval(pollingRef.current!);
           pollingRef.current = null;
@@ -208,7 +206,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
       return;
     }
     setYtState('uploading');
-    setYtProgress(null);
     try {
       const job = await youtubeService.exportVideo(currentVideo.id, {
         title: shareTitle.trim(),
@@ -247,7 +244,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
     if (pollingRef.current) clearInterval(pollingRef.current);
     pollingRef.current = null;
     setYtState('idle');
-    setYtProgress(null);
     setYtError(null);
     setYtUrl(null);
     setModalOpen(false);
