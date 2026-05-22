@@ -16,7 +16,6 @@ interface YouTubeShareModalProps {
   onTagsChange: (tags: string) => void;
   onPrivacyChange: (privacy: YouTubePrivacyStatus) => void;
   ytState: YtState;
-  ytProgress: number | null;
   ytUrl: string | null;
   ytError: string | null;
   onSubmit: (e: FormEvent) => void;
@@ -44,7 +43,6 @@ export function YouTubeShareModal({
   onTagsChange,
   onPrivacyChange,
   ytState,
-  ytProgress,
   ytUrl,
   ytError,
   onSubmit,

@@ -272,7 +272,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
         onTagsChange={setShareTags}
         onPrivacyChange={setSharePrivacy}
         ytState={ytState}
-        ytProgress={ytProgress}
         ytUrl={ytUrl}
         ytError={ytError}
         onSubmit={handleShareSubmit}
