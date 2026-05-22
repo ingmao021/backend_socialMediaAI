@@ -852,7 +852,7 @@ img, video { max-width: 100%; display: block; }
   to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 .yt-modal-header {
- : flex;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.1rem 1.25rem 0.9rem;
@@ -891,8 +891,14 @@ img, video { max-width: 100%; display: block; }
 }
 .yt-modal-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .yt-modal-preview-overlay { position: absolute; bottom: 0.5rem; right: 0.5rem; }
-.yt-modal-duratio.yt-modal-duratio.yt-modal-duratio.yt-modal-dufff;
-                 rem;
+.yt-modal-duration {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
 }
@@ -920,7 +926,9 @@ img, video { max-width: 100%; display: block; }
   box-sizing: border-box;
 }
 .yt-modal-input:focus,
-.yt-.yt-.yt-.yt-.yt-.cus {.yt-.yt-.yt-.yt: #ff.yt-.yt-.yt-shadow: 0 0 0 3px rgba(255, 0, 0, 0.12);
+.yt-modal-textarea:focus {
+  border-color: #ff0000;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.12);
 }
 .yt-modal-counter { align-self: flex-end; font-size: 0.7rem; color: var(--text-muted); }
 .yt-privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
@@ -954,7 +962,7 @@ img, video { max-width: 100%; display: block; }
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap:   gap:   gap:   gap:   gn: none;
+  gap: 0.5rem;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
 }
 .btn-yt-modal:hover:not(:disabled) {
@@ -977,9 +985,11 @@ img, video { max-width: 100%; display: block; }
   justify-content: center;
   font-size: 0.8rem;
   font-weight: 700;
-    lor: var(--te  -muted);
-  bac  bac  : var(--bg-seco  bac ;
-  flex-shrink:   flex-shrink:   all  flex-shrink:   flex-s.yt-  flex-shrink:yt-step-circle { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 0 4px rgba(255,0,0,0.15); }
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+.yt-step--active .yt-step-circle { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 0 4px rgba(255,0,0,0.15); }
 .yt-step--done .yt-step-circle { border-color: #22c55e; background: #22c55e; color: #fff; }
 .yt-step-info { display: flex; flex-direction: column; padding-top: 0.4rem; padding-bottom: 1.25rem; }
 .yt-step-label { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); transition: color 0.3s; }
@@ -991,7 +1001,10 @@ img, video { max-width: 100%; display: block; }
   left: 15px;
   top: 32px;
   width: 2px;
-  height: calc(100% - 32px + 4px)  height: calc(100% - 32px + 4px)  height:.yt-step--done .yt-step-line { background: #22c55e; }
+  height: calc(100% - 32px + 4px);
+  background: var(--bg-glass-border);
+}
+.yt-step--done .yt-step-line { background: #22c55e; }
 .yt-step-spinner {
   width: 14px;
   height: 14px;
@@ -1007,7 +1020,7 @@ img, video { max-width: 100%; display: block; }
 .yt-modal-hint { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin: 0; }
 .yt-modal-done-body { align-items: center; text-align: center; padding: 2rem 1.5rem; }
 .yt-done-icon-big { font-size: 3rem; }
-.yt-done-title { font-size: 1.15rem.yt-doneeight: 7.yt-done-title(--text-primary); margin: 0; }
+.yt-done-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0; }
 .yt-done-sub { font-size: 0.85rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 .yt-modal-error-body { align-items: center; text-align: center; padding: 2rem 1.5rem; }
 .yt-error-icon-big { font-size: 2.5rem; }

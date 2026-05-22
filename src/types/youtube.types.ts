@@ -11,10 +11,10 @@ export type YouTubePrivacyStatus = 'PRIVATE' | 'UNLISTED' | 'PUBLIC';
 
 /** Respuesta de GET /api/youtube/connection */
 export interface YouTubeConnectionResponse {
-  channelId: string;
-  channelTitle: string;
-  connectedAt: string; // ISO timestamp
-  active: boolean;
+  connected: boolean;
+  channelId: string | null;
+  channelName: string | null;
+  connectedAt: string | null;
 }
 
 /** Respuesta de POST /api/youtube/oauth/connect */

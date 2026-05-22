@@ -17,7 +17,8 @@ export function YouTubeConnectedPage() {
   const isSuccess = status === 'success';
 
   const errorMessages: Record<string, string> = {
-    USER_DENIED: 'Cancelaste la autorización de YouTube.',
+    ACCESS_DENIED: 'Cancelaste la autorización de YouTube.',
+    INVALID_REQUEST: 'Solicitud inválida. Por favor, intenta de nuevo.',
     INVALID_STATE: 'La sesión expiró. Por favor, vuelve a intentarlo.',
     INSUFFICIENT_SCOPES: 'Debes aceptar todos los permisos solicitados para conectar YouTube.',
     INTERNAL_ERROR: 'Algo salió mal. Por favor, inténtalo de nuevo.',

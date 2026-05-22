@@ -55,6 +55,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   const [ytError, setYtError] = useState<string | null>(null);
   const [shareTitle, setShareTitle] = useState('');
   const [shareDescription, setShareDesc] = useState('');
+  const [shareTags, setShareTags] = useState('');
   const [sharePrivacy, setSharePrivacy] = useState<YouTubePrivacyStatus>('PRIVATE');
   const [checkingConnection, setCheckingConnection] = useState(false);
   /** Persiste info del video publicado en YouTube incluso tras cerrar el modal */
@@ -80,6 +81,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
     const stored = localStorage.getItem(`yt-published-${currentVideo.id}`);
     if (stored) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPublishedInfo(JSON.parse(stored));
       } catch {
         localStorage.removeItem(`yt-published-${currentVideo.id}`);
@@ -166,22 +168,33 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   const handleShareClick = async () => {
     setCheckingConnection(true);
     try {
-      await youtubeService.getConnection();
+      const connection = await youtubeService.getConnection();
+      if (!connection.connected) {
+        const { authorizationUrl } = await youtubeService.initiateOAuth();
+        window.location.href = authorizationUrl;
+        return;
+      }
       setShareTitle(currentVideo.prompt.substring(0, 100));
       setShareDesc('');
+      setShareTags('');
       setSharePrivacy('PRIVATE');
       setYtState('form');
       setModalOpen(true);
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        try {
-          const { authorizationUrl } = await youtubeService.initiateOAuth();
-          window.location.href = authorizationUrl;
-        } catch {
-          toast.error('No se pudo iniciar la conexión con YouTube');
+      if (axios.isAxiosError(err)) {
+        const code = (err.response?.data as { code?: string })?.code;
+        if (code === 'YOUTUBE_NOT_CONNECTED') {
+          try {
+            const { authorizationUrl } = await youtubeService.initiateOAuth();
+            window.location.href = authorizationUrl;
+          } catch {
+            toast.error('No se pudo iniciar la conexión con YouTube');
+          }
+        } else {
+          toast.error('Error al verificar la conexión con YouTube');
         }
       } else {
-        toast.error('Error al verificar la conexión con YouTube');
+        toast.error('Error de conexión');
       }
     } finally {
       setCheckingConnection(false);
@@ -200,7 +213,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
       const job = await youtubeService.exportVideo(currentVideo.id, {
         title: shareTitle.trim(),
         description: shareDescription.trim() || null,
-        tags: null,
+        tags: shareTags.trim() || null,
         privacyStatus: sharePrivacy,
       });
       startJobPolling(job.jobId);
@@ -252,15 +265,16 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
         video={currentVideo}
         shareTitle={shareTitle}
         shareDescription={shareDescription}
+        shareTags={shareTags}
         sharePrivacy={sharePrivacy}
         onTitleChange={setShareTitle}
         onDescriptionChange={setShareDesc}
+        onTagsChange={setShareTags}
         onPrivacyChange={setSharePrivacy}
         ytState={ytState}
         ytProgress={ytProgress}
         ytUrl={ytUrl}
         ytError={ytError}
-        checkingConnection={checkingConnection}
         onSubmit={handleShareSubmit}
         onClose={handleModalClose}
       />

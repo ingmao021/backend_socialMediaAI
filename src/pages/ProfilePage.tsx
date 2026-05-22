@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { userService } from '../services/userService';
@@ -66,8 +67,17 @@ export function ProfilePage() {
       await userService.uploadAvatar(file);
       await refreshUser();
       toast.success('Avatar actualizado.');
-    } catch {
-      toast.error('Error al subir el avatar.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const statusCode = err.response?.status;
+        if (statusCode === 413) {
+          toast.error('La imagen es demasiado grande. Máximo 2 MB.');
+        } else {
+          toast.error('Error al subir el avatar.');
+        }
+      } else {
+        toast.error('Error al subir el avatar.');
+      }
       setAvatarPreview(null);
     } finally {
       setUploadingAvatar(false);

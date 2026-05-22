@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FormEvent } from 'react';
 import type { YouTubePrivacyStatus } from '../types/youtube.types';
 import type { VideoResponse } from '../types/video.types';
 
@@ -7,37 +7,24 @@ type YtState = 'idle' | 'form' | 'uploading' | 'done' | 'error';
 interface YouTubeShareModalProps {
   isOpen: boolean;
   video: VideoResponse;
-  // Form state
   shareTitle: string;
   shareDescription: string;
+  shareTags: string;
   sharePrivacy: YouTubePrivacyStatus;
   onTitleChange: (title: string) => void;
   onDescriptionChange: (desc: string) => void;
+  onTagsChange: (tags: string) => void;
   onPrivacyChange: (privacy: YouTubePrivacyStatus) => void;
-  // YouTube flow state
   ytState: YtState;
   ytProgress: number | null;
   ytUrl: string | null;
   ytError: string | null;
-  checkingConnection: boolean;
-  // Callbacks — lógica intacta, solo envuelve en modal
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: FormEvent) => void;
   onClose: () => void;
 }
 
-/** Deriva el paso de upload visible a partir del estado interno */
-function deriveStep(ytState: YtState, ytProgress: number | null): number {
-  if (ytState !== 'uploading') return 0;
-  if (ytProgress === null) return 1;        // PENDING → Conectando
-  if (ytProgress < 100) return 2;           // UPLOADING → Subiendo
-  return 3;                                  // 100% → Procesando
-}
-
-const STEPS = [
-  { label: 'Conectando cuenta', icon: '🔗' },
-  { label: 'Subiendo video', icon: '⬆️' },
-  { label: 'Procesando', icon: '⚙️' },
-];
+const MAX_DESCRIPTION = 5000;
+const MAX_TAGS = 500;
 
 const PRIVACY_OPTIONS: { value: YouTubePrivacyStatus; label: string; icon: string; desc: string }[] = [
   { value: 'PRIVATE', label: 'Privado', icon: '🔒', desc: 'Solo tú puedes verlo' },
@@ -50,21 +37,21 @@ export function YouTubeShareModal({
   video,
   shareTitle,
   shareDescription,
+  shareTags,
   sharePrivacy,
   onTitleChange,
   onDescriptionChange,
+  onTagsChange,
   onPrivacyChange,
   ytState,
   ytProgress,
   ytUrl,
   ytError,
-  checkingConnection,
   onSubmit,
   onClose,
 }: YouTubeShareModalProps) {
   if (!isOpen) return null;
 
-  const step = deriveStep(ytState, ytProgress);
   const isUploading = ytState === 'uploading';
   const isDone = ytState === 'done';
   const isError = ytState === 'error';
@@ -133,10 +120,25 @@ export function YouTubeShareModal({
                 value={shareDescription}
                 onChange={(e) => onDescriptionChange(e.target.value)}
                 placeholder="Describe tu video (opcional)"
-                maxLength={500}
+                maxLength={MAX_DESCRIPTION}
                 rows={3}
               />
-              <span className="yt-modal-counter">{shareDescription.length}/500</span>
+              <span className="yt-modal-counter">{shareDescription.length}/{MAX_DESCRIPTION}</span>
+            </div>
+
+            {/* Tags */}
+            <div className="yt-modal-field">
+              <label className="yt-modal-label" htmlFor="yt-tags">Etiquetas</label>
+              <input
+                id="yt-tags"
+                className="yt-modal-input"
+                type="text"
+                value={shareTags}
+                onChange={(e) => onTagsChange(e.target.value)}
+                placeholder="video, ai, redes-sociales (separadas por coma)"
+                maxLength={MAX_TAGS}
+              />
+              <span className="yt-modal-counter">{shareTags.length}/{MAX_TAGS}</span>
             </div>
 
             {/* Privacidad */}

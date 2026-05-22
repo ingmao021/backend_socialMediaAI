@@ -60,22 +60,37 @@ export function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  async function handleGenerate(request: GenerateVideoRequest) {
+async function handleGenerate(request: GenerateVideoRequest) {
     try {
       await videoService.generateVideo(request);
       toast.success('Video en cola de generación.');
-      // Refresh list to show the new PROCESSING video
       await loadVideos(0);
       setPage(0);
       await refreshUser();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const code = (err.response?.data as ApiError | undefined)?.code;
-        if (code === 'QUOTA_EXCEEDED') {
-          toast.error('Has alcanzado el límite de videos.');
-          refreshUser();
+        const apiError = err.response?.data as ApiError | undefined;
+        const code = apiError?.code;
+        const statusCode = err.response?.status;
+
+        if (statusCode === 403 && code === 'QUOTA_EXCEEDED') {
+          toast.error(
+            apiError?.fields?.quota
+              ? apiError.fields.quota
+              : 'Has alcanzado el límite de videos.',
+          );
+          void refreshUser();
         } else if (code === 'VALIDATION_ERROR') {
-          toast.error('Prompt o duración inválidos.');
+          const fieldErrors = apiError?.fields;
+          if (fieldErrors) {
+            const messages = Object.values(fieldErrors);
+            toast.error(messages[0] ?? 'Datos inválidos.');
+          } else {
+            toast.error('Prompt o duración inválidos.');
+          }
+        } else if (code === 'QUOTA_EXCEEDED') {
+          toast.error('Has alcanzado el límite de videos.');
+          void refreshUser();
         } else {
           toast.error('Error al generar el video.');
         }
@@ -84,8 +99,7 @@ export function DashboardPage() {
       }
     }
   }
-
-  async function handleDelete(videoId: string) {
+      async function handleDelete(videoId: string) {
     if (!confirm('¿Eliminar este video? Esta acción no se puede deshacer.')) return;
 
     try {
