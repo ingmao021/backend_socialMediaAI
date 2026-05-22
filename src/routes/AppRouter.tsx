@@ -18,6 +18,8 @@ export function AppRouter() {
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
       {/* Catch-all: redirect to dashboard (ProtectedRoute handles auth) */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
