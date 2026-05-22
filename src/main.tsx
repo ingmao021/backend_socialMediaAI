@@ -9,16 +9,6 @@ import './index.css';
 
 const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID?.trim();
 
-function MissingEnvFallback() {
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center', color: '#fff', background: '#1a1a2e', minHeight: '100vh' }}>
-      <h1>Configuración incomplete</h1>
-      <p>Falta la variable de entorno <code>GOOGLE_CLIENT_ID</code> en Vercel.</p>
-      <p>Agregala en: Vercel Dashboard → Settings → Environment Variables</p>
-    </div>
-  );
-}
-
 if (!GOOGLE_CLIENT_ID) {
   document.getElementById('root')!.innerHTML = `
     <div style="padding:2rem;text-align:center;color:#fff;background:#1a1a2e;min-height:100vh;font-family:sans-serif;">
