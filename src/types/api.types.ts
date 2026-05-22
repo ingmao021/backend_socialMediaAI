@@ -1,7 +1,7 @@
 export interface ApiError {
   code: string;
   message: string;
-  fields: Record<string, string> | null;
+  fields?: Record<string, string>;
 }
 
 export interface PageResponse<T> {
