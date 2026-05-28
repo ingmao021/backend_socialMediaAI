@@ -18,17 +18,11 @@ export const userService = {
   async uploadAvatar(file: File): Promise<UserResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    // Do NOT set Content-Type manually — axios auto-detects FormData
-    // and adds the correct multipart/form-data; boundary=... header.
-    // Setting it manually would strip the boundary and the backend rejects it.
-    const { data } = await apiClient.post<UserResponse>(
+    // postForm (Axios 1.x) serializes FormData with correct multipart/form-data
+    // boundary header, while still applying the JWT interceptor from apiClient.
+    const { data } = await apiClient.postForm<UserResponse>(
       '/api/users/me/avatar',
       formData,
-      {
-        headers: {
-          'Content-Type': undefined as unknown as string,
-        },
-      },
     );
     return data;
   },
