@@ -11,7 +11,8 @@ interface GenerateVideoFormProps {
 }
 
 const DURATIONS: Array<GenerateVideoRequest['durationSeconds']> = [4, 6, 8];
-const MAX_PROMPT_LENGTH = 2000;
+const MAX_PROMPT_LENGTH = 200;
+const PROMPT_WARNING_THRESHOLD = 180;
 
 export function GenerateVideoForm({
   onGenerate,
@@ -61,9 +62,23 @@ export function GenerateVideoForm({
             disabled={disabled || quotaReached}
             rows={3}
           />
-          <span className="form-hint">
+          <span
+            className="form-hint"
+            style={
+              prompt.length >= MAX_PROMPT_LENGTH
+                ? { color: 'var(--error, #ef4444)', fontWeight: 600 }
+                : prompt.length >= PROMPT_WARNING_THRESHOLD
+                ? { color: 'var(--warning, #f59e0b)' }
+                : undefined
+            }
+          >
             {prompt.length}/{MAX_PROMPT_LENGTH}
           </span>
+          {prompt.length >= MAX_PROMPT_LENGTH && (
+            <span className="form-error-msg">
+              Has alcanzado el límite máximo de caracteres (200).
+            </span>
+          )}
         </div>
 
         <div className="form-group">

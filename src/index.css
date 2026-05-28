@@ -199,6 +199,13 @@ img, video { max-width: 100%; display: block; }
   text-align: right;
 }
 
+.form-error-msg {
+  font-size: 0.8rem;
+  color: var(--error, #ef4444);
+  margin-top: 0.25rem;
+  display: block;
+}
+
 /* ========================================
    6. Glass Card
    ======================================== */
