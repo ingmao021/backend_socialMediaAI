@@ -271,6 +271,16 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   };
   // ─────────────────────────────────────────────────────────────────────
 
+  const handleCopyLink = async () => {
+    if (!currentVideo.signedUrl) return;
+    try {
+      await navigator.clipboard.writeText(currentVideo.signedUrl);
+      toast.success('Enlace copiado al portapapeles. Expira en ~1 hora.', { duration: 4000 });
+    } catch {
+      toast.error('Tu navegador no permite copiar al portapapeles');
+    }
+  };
+
   const statusCfg = STATUS_CONFIG[currentVideo.status];
   const isCompleted = currentVideo.status === 'COMPLETED';
 
@@ -381,6 +391,15 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
               )
             )}
             {/* ─────────────────────────────────────────────── */}
+            {isCompleted && currentVideo.signedUrl && (
+              <button
+                className="btn btn-copy-link btn-sm"
+                onClick={handleCopyLink}
+                title="Copiar enlace del video"
+              >
+                Copiar enlace
+              </button>
+            )}
             <button
               className="btn btn-danger btn-sm"
               onClick={() => onDelete(currentVideo.id)}
