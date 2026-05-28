@@ -1,6 +1,8 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 const MAX_PROMPT_LENGTH = 200;
+
+const FATAL_ERRORS = new Set(['not-allowed', 'audio-capture', 'service-not-allowed']);
 
 interface UseVoiceInputOptions {
   onTranscript: (text: string) => void;
@@ -10,45 +12,73 @@ interface UseVoiceInputOptions {
 export function useVoiceInput({ onTranscript, currentText }: UseVoiceInputOptions) {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const isListeningRef = useRef(false);
+  const currentTextRef = useRef(currentText);
+
+  useEffect(() => {
+    currentTextRef.current = currentText;
+  }, [currentText]);
 
   const isSupported =
     typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
-  const startListening = useCallback(() => {
-    if (!isSupported || isListening) return;
-
-    const SpeechRecognitionConstructor =
-      window.SpeechRecognition ?? window.webkitSpeechRecognition;
-
-    const recognition = new SpeechRecognitionConstructor();
+  const createAndStart = useCallback(() => {
+    const Ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    const recognition = new Ctor();
     recognition.lang = 'es-ES';
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0]?.[0]?.transcript ?? '';
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0]?.transcript ?? '';
+        }
+      }
       if (!transcript) return;
-      const separator = currentText.length > 0 && !currentText.endsWith(' ') ? ' ' : '';
-      const combined = currentText + separator + transcript;
-      onTranscript(combined.substring(0, MAX_PROMPT_LENGTH));
+      const base = currentTextRef.current;
+      const separator = base.length > 0 && !base.endsWith(' ') ? ' ' : '';
+      onTranscript((base + separator + transcript).substring(0, MAX_PROMPT_LENGTH));
     };
 
-    recognition.onerror = () => {
-      setIsListening(false);
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (FATAL_ERRORS.has(event.error)) {
+        isListeningRef.current = false;
+        setIsListening(false);
+      }
+      // non-fatal errors (no-speech, network, aborted) are ignored; onend will restart
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      if (isListeningRef.current) {
+        // Auto-restart: covers Safari silence timeouts and transient browser stops
+        try {
+          recognition.start();
+        } catch {
+          // if start() throws while already starting, ignore
+        }
+      } else {
+        setIsListening(false);
+      }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
+  }, [onTranscript]);
+
+  const startListening = useCallback(() => {
+    if (!isSupported || isListeningRef.current) return;
+    isListeningRef.current = true;
     setIsListening(true);
-  }, [isSupported, isListening, currentText, onTranscript]);
+    createAndStart();
+  }, [isSupported, createAndStart]);
 
   const stopListening = useCallback(() => {
+    isListeningRef.current = false;
     recognitionRef.current?.stop();
+    recognitionRef.current = null;
     setIsListening(false);
   }, []);
 
