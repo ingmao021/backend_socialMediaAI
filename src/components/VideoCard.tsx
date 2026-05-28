@@ -300,11 +300,30 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
     }
   };
 
+  const getShareableLink = (): { url: string; isYouTube: boolean } | null => {
+    if (publishedInfo?.url) {
+      return { url: publishedInfo.url, isYouTube: true };
+    }
+    if (currentVideo.signedUrl) {
+      try {
+        const parsed = new URL(currentVideo.signedUrl);
+        return { url: parsed.origin + parsed.pathname, isYouTube: false };
+      } catch {
+        return { url: currentVideo.signedUrl, isYouTube: false };
+      }
+    }
+    return null;
+  };
+
   const handleCopyLink = async () => {
-    if (!currentVideo.signedUrl) return;
+    const link = getShareableLink();
+    if (!link) {
+      toast.error('El enlace no está disponible');
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(currentVideo.signedUrl);
-      toast.success('Enlace copiado al portapapeles. Expira en ~1 hora.', { duration: 4000 });
+      await navigator.clipboard.writeText(link.url);
+      toast.success(link.isYouTube ? 'Enlace de YouTube copiado' : 'Enlace del video copiado');
     } catch {
       toast.error('Tu navegador no permite copiar al portapapeles');
     }
