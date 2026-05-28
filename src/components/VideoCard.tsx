@@ -305,12 +305,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
       return { url: publishedInfo.url, isYouTube: true };
     }
     if (currentVideo.signedUrl) {
-      try {
-        const parsed = new URL(currentVideo.signedUrl);
-        return { url: parsed.origin + parsed.pathname, isYouTube: false };
-      } catch {
-        return { url: currentVideo.signedUrl, isYouTube: false };
-      }
+      return { url: currentVideo.signedUrl, isYouTube: false };
     }
     return null;
   };
