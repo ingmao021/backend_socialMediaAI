@@ -5,6 +5,9 @@ import { useAuth } from '../hooks/useAuth';
 import axios from 'axios';
 import type { ApiError } from '../types/api.types';
 
+const MAX_NAME_LENGTH = 150;
+const NAME_WARNING_THRESHOLD = 130;
+
 export function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +22,11 @@ export function RegisterPage() {
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
 
-    if (!name.trim()) newErrors.name = 'El nombre es obligatorio.';
+    if (!name.trim()) {
+      newErrors.name = 'El nombre es obligatorio.';
+    } else if (name.length > MAX_NAME_LENGTH) {
+      newErrors.name = `El nombre no puede superar ${MAX_NAME_LENGTH} caracteres.`;
+    }
     if (!email.trim()) {
       newErrors.email = 'El email es obligatorio.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -98,13 +105,35 @@ export function RegisterPage() {
             <input
               id="register-name"
               type="text"
-              className={`form-input ${errors.name ? 'input-error' : ''}`}
+              className={`form-input ${errors.name || name.length > MAX_NAME_LENGTH ? 'input-error' : ''}`}
               placeholder="Tu nombre"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name && e.target.value.length <= MAX_NAME_LENGTH) {
+                  setErrors((prev) => ({ ...prev, name: '' }));
+                }
+              }}
               autoComplete="name"
               disabled={loading}
             />
+            {name.length >= NAME_WARNING_THRESHOLD && (
+              <span
+                className="form-hint"
+                style={
+                  name.length > MAX_NAME_LENGTH
+                    ? { color: 'var(--error, #ef4444)', fontWeight: 600 }
+                    : { color: 'var(--warning, #f59e0b)' }
+                }
+              >
+                {name.length}/{MAX_NAME_LENGTH}
+              </span>
+            )}
+            {name.length > MAX_NAME_LENGTH && !errors.name && (
+              <span className="form-error">
+                El nombre no puede superar {MAX_NAME_LENGTH} caracteres.
+              </span>
+            )}
             {errors.name && <span className="form-error">{errors.name}</span>}
           </div>
 
