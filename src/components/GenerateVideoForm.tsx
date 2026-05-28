@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { GenerateVideoRequest } from '../types/video.types';
 import { useVoiceInput } from '../hooks/useVoiceInput';
+import { MdMic, MdStop } from 'react-icons/md';
 
 interface GenerateVideoFormProps {
   onGenerate: (request: GenerateVideoRequest) => Promise<void>;
@@ -66,7 +67,7 @@ export function GenerateVideoForm({
                 title={isListening ? 'Detener grabación' : 'Dictar por voz'}
                 aria-label={isListening ? 'Detener grabación' : 'Dictar por voz'}
               >
-                {isListening ? '⏹' : '🎤'}
+                {isListening ? <MdStop size={20} /> : <MdMic size={20} />}
               </button>
             )}
           </div>
