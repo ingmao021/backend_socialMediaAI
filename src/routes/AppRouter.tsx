@@ -5,6 +5,7 @@ import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { YouTubeConnectedPage } from '../pages/YouTubeConnectedPage';
+import { HistoryPage } from '../pages/HistoryPage';
 export function AppRouter() {
   return (
     <Routes>
@@ -16,6 +17,7 @@ export function AppRouter() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/history" element={<HistoryPage />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

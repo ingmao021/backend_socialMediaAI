@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +38,27 @@ export function Header() {
           <span className="header-logo-icon">▶</span>
           <span>Social Video AI</span>
         </div>
+
+        <nav className="header-nav">
+          <button
+            className={`header-nav-link${location.pathname === '/dashboard' ? ' header-nav-link--active' : ''}`}
+            onClick={() => navigate('/dashboard')}
+          >
+            Inicio
+          </button>
+          <button
+            className={`header-nav-link${location.pathname === '/history' ? ' header-nav-link--active' : ''}`}
+            onClick={() => navigate('/history')}
+          >
+            Historial
+          </button>
+          <button
+            className={`header-nav-link${location.pathname === '/favorites' ? ' header-nav-link--active' : ''}`}
+            onClick={() => navigate('/favorites')}
+          >
+            Favoritos
+          </button>
+        </nav>
 
         <div className="header-right">
           <div className="quota-badge" title="Videos generados / límite">
