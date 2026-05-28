@@ -22,6 +22,7 @@ interface YouTubeShareModalProps {
   onClose: () => void;
   titleError?: string | null;
   descriptionError?: string | null;
+  loadingSuggestions?: boolean;
 }
 
 const MAX_TITLE = 100;
@@ -54,10 +55,11 @@ export function YouTubeShareModal({
   onClose,
   titleError,
   descriptionError,
+  loadingSuggestions = false,
 }: YouTubeShareModalProps) {
   const titleOverLimit = shareTitle.length > MAX_TITLE;
   const descriptionOverLimit = shareDescription.length > MAX_DESCRIPTION;
-  const isFormInvalid = titleOverLimit || descriptionOverLimit || !shareTitle.trim();
+  const isFormInvalid = titleOverLimit || descriptionOverLimit || !shareTitle.trim() || loadingSuggestions;
   if (!isOpen) return null;
 
   const isUploading = ytState === 'uploading';
@@ -105,14 +107,22 @@ export function YouTubeShareModal({
 
             {/* Título */}
             <div className="yt-modal-field">
-              <label className="yt-modal-label" htmlFor="yt-title">Título *</label>
+              <label className="yt-modal-label" htmlFor="yt-title">
+                Título *
+                {loadingSuggestions && (
+                  <span className="yt-suggestions-loading">
+                    <span className="spinner spinner-xs" /> Generando sugerencia…
+                  </span>
+                )}
+              </label>
               <input
                 id="yt-title"
                 className={`yt-modal-input${titleOverLimit ? ' yt-modal-input--error' : ''}`}
                 type="text"
                 value={shareTitle}
                 onChange={(e) => onTitleChange(e.target.value)}
-                placeholder="Título del video en YouTube"
+                placeholder={loadingSuggestions ? 'Generando título con IA…' : 'Título del video en YouTube'}
+                disabled={loadingSuggestions}
                 required
               />
               <span
@@ -145,7 +155,8 @@ export function YouTubeShareModal({
                 className={`yt-modal-textarea${descriptionOverLimit ? ' yt-modal-input--error' : ''}`}
                 value={shareDescription}
                 onChange={(e) => onDescriptionChange(e.target.value)}
-                placeholder="Describe tu video (opcional)"
+                placeholder={loadingSuggestions ? 'Generando descripción con IA…' : 'Describe tu video (opcional)'}
+                disabled={loadingSuggestions}
                 rows={3}
               />
               <span

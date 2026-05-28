@@ -910,6 +910,22 @@ img, video { max-width: 100%; display: block; }
   border-radius: 4px;
 }
 .yt-modal-field { display: flex; flex-direction: column; gap: 0.3rem; position: relative; }
+.yt-suggestions-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.spinner-xs {
+  width: 10px;
+  height: 10px;
+  border-width: 2px;
+}
 .yt-modal-label {
   font-size: 0.8rem;
   font-weight: 600;

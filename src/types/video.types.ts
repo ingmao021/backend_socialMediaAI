@@ -22,3 +22,8 @@ export interface GenerateVideoRequest {
   prompt: string;
   durationSeconds: 4 | 6 | 8; // literal type — prevents invalid values at compile time
 }
+
+export interface VideoMetadataSuggestions {
+  title: string;
+  description: string;
+}

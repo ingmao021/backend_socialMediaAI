@@ -57,6 +57,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   const [shareTags, setShareTags] = useState('');
   const [sharePrivacy, setSharePrivacy] = useState<YouTubePrivacyStatus>('PRIVATE');
   const [checkingConnection, setCheckingConnection] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   /** Persiste info del video publicado en YouTube incluso tras cerrar el modal */
   const [publishedInfo, setPublishedInfo] = useState<PublishedInfo | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -178,6 +179,18 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
       setSharePrivacy('PRIVATE');
       setYtState('form');
       setModalOpen(true);
+      setLoadingSuggestions(true);
+      videoService.getMetadataSuggestions(currentVideo.id)
+        .then((suggestions) => {
+          setShareTitle(suggestions.title.substring(0, 100));
+          setShareDesc(suggestions.description);
+        })
+        .catch(() => {
+          // Si el backend no devuelve sugerencias, se mantiene el prompt como título
+        })
+        .finally(() => {
+          setLoadingSuggestions(false);
+        });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const code = (err.response?.data as { code?: string })?.code;
@@ -280,6 +293,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
         ytError={ytError}
         onSubmit={handleShareSubmit}
         onClose={handleModalClose}
+        loadingSuggestions={loadingSuggestions}
       />
       {/* ─────────────────────────────────────────────────── */}
 

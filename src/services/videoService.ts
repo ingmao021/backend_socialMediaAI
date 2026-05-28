@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import type {
   GenerateVideoRequest,
+  VideoMetadataSuggestions,
   VideoResponse,
   VideoStatusResponse,
 } from '../types/video.types';
@@ -44,5 +45,12 @@ export const videoService = {
 
   async deleteVideo(videoId: string): Promise<void> {
     await apiClient.delete(`/api/videos/${videoId}`);
+  },
+
+  async getMetadataSuggestions(videoId: string): Promise<VideoMetadataSuggestions> {
+    const { data } = await apiClient.get<VideoMetadataSuggestions>(
+      `/api/videos/${videoId}/metadata-suggestions`,
+    );
+    return data;
   },
 };
