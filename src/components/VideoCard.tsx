@@ -67,6 +67,8 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
   const [publishedInfo, setPublishedInfo] = useState<PublishedInfo | null>(null);
   /** Estado de sincronización real del video contra YouTube Data API */
   const [ytSyncStatus, setYtSyncStatus] = useState<YouTubeSyncStatus>('UNKNOWN');
+  /** true mientras se carga el estado de YouTube — evita mostrar el botón de publicar prematuramente */
+  const [ytLoading, setYtLoading] = useState<boolean>(video.status === 'COMPLETED');
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // ─────────────────────────────────────────────────────────────────────
 
@@ -118,6 +120,8 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
             localStorage.removeItem(`yt-published-${currentVideo.id}`);
           }
         }
+      } finally {
+        setYtLoading(false);
       }
     };
 
@@ -468,7 +472,9 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
           <div className="video-card-actions">
             {/* ── Botón YouTube con estado contextual ── */}
             {isCompleted && (
-              publishedInfo && ytSyncStatus === 'ACTIVE' ? (
+              ytLoading ? (
+                <span className="spinner spinner-sm" />
+              ) : publishedInfo && (ytSyncStatus === 'ACTIVE' || ytSyncStatus === 'UNAVAILABLE') ? (
                 <a
                   href={publishedInfo.url}
                   target="_blank"
@@ -486,7 +492,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
                 >
                   {checkingConnection ? (
                     <span className="spinner spinner-sm" />
-                  ) : ytSyncStatus === 'DELETED' || ytSyncStatus === 'UNAVAILABLE' ? (
+                  ) : ytSyncStatus === 'DELETED' ? (
                     'Volver a publicar'
                   ) : (
                     'Compartir en YouTube'
