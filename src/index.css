@@ -749,10 +749,22 @@ img, video { max-width: 100%; display: block; }
 .history-item-prompt {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
   margin: 0;
+}
+.history-expand-btn {
+  background: none;
+  border: none;
+  color: var(--primary, #7c3aed);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.35rem;
+  font-weight: 500;
+}
+.history-expand-btn:hover {
+  text-decoration: underline;
 }
 .history-item-right {
   display: flex;

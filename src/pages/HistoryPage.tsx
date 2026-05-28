@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { videoService } from '../services/videoService';
+
+const PROMPT_PREVIEW_LIMIT = 120;
 import type { VideoResponse } from '../types/video.types';
 import type { PageResponse } from '../types/api.types';
 
@@ -44,6 +46,15 @@ export function HistoryPage() {
   const [filter, setFilter] = useState<StatusFilter>('ALL');
   const [dateFilter, setDateFilter] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
   const loadVideos = useCallback(async (p: number) => {
     setLoading(true);
@@ -64,17 +75,6 @@ export function HistoryPage() {
   useEffect(() => {
     void loadVideos(page);
   }, [page, loadVideos]);
-
-  const handleDelete = async (videoId: string) => {
-    if (!confirm('¿Eliminar este video? Esta acción no se puede deshacer.')) return;
-    try {
-      await videoService.deleteVideo(videoId);
-      toast.success('Video eliminado.');
-      void loadVideos(page);
-    } catch {
-      toast.error('Error al eliminar el video.');
-    }
-  };
 
   const allVideos = videosData?.content ?? [];
   const filteredVideos = allVideos.filter((v) => {
@@ -177,9 +177,27 @@ export function HistoryPage() {
                           <span className="status-dot" />
                           {statusCfg.label}
                         </div>
-                        <p className="history-item-prompt" title={video.prompt}>
-                          {video.prompt}
-                        </p>
+                        {(() => {
+                          const isExpanded = expandedIds.has(video.id);
+                          const isLong = video.prompt.length > PROMPT_PREVIEW_LIMIT;
+                          const displayText =
+                            isLong && !isExpanded
+                              ? video.prompt.substring(0, PROMPT_PREVIEW_LIMIT) + '…'
+                              : video.prompt;
+                          return (
+                            <p className="history-item-prompt">
+                              {displayText}
+                              {isLong && (
+                                <button
+                                  className="history-expand-btn"
+                                  onClick={() => toggleExpand(video.id)}
+                                >
+                                  {isExpanded ? 'Ver menos' : 'Ver más'}
+                                </button>
+                              )}
+                            </p>
+                          );
+                        })()}
                       </div>
                       <div className="history-item-right">
                         <span className="history-item-meta">{video.durationSeconds}s</span>
@@ -189,12 +207,6 @@ export function HistoryPage() {
                             minute: '2-digit',
                           })}
                         </span>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(video.id)}
-                        >
-                          Eliminar
-                        </button>
                       </div>
                     </div>
                   );
