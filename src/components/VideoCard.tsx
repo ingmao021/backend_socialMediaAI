@@ -205,6 +205,14 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
       toast.error('El título es obligatorio');
       return;
     }
+    if (shareTitle.length > 100) {
+      toast.error('El título es demasiado largo (máx. 100 caracteres)');
+      return;
+    }
+    if (shareDescription.length > 5000) {
+      toast.error('La descripción es demasiado larga (máx. 5000 caracteres)');
+      return;
+    }
     setYtState('uploading');
     try {
       const job = await youtubeService.exportVideo(currentVideo.id, {

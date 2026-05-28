@@ -938,6 +938,11 @@ img, video { max-width: 100%; display: block; }
   box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.12);
 }
 .yt-modal-counter { align-self: flex-end; font-size: 0.7rem; color: var(--text-muted); }
+.yt-modal-input--error,
+.yt-modal-input--error:focus {
+  border-color: var(--error, #ef4444) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
 .yt-privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
 .yt-privacy-option {
   display: flex;

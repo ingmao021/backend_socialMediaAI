@@ -20,10 +20,15 @@ interface YouTubeShareModalProps {
   ytError: string | null;
   onSubmit: (e: FormEvent) => void;
   onClose: () => void;
+  titleError?: string | null;
+  descriptionError?: string | null;
 }
 
+const MAX_TITLE = 100;
 const MAX_DESCRIPTION = 5000;
 const MAX_TAGS = 500;
+const TITLE_WARNING_THRESHOLD = 85;
+const DESCRIPTION_WARNING_THRESHOLD = 4500;
 
 const PRIVACY_OPTIONS: { value: YouTubePrivacyStatus; label: string; icon: string; desc: string }[] = [
   { value: 'PRIVATE', label: 'Privado', icon: '🔒', desc: 'Solo tú puedes verlo' },
@@ -47,7 +52,12 @@ export function YouTubeShareModal({
   ytError,
   onSubmit,
   onClose,
+  titleError,
+  descriptionError,
 }: YouTubeShareModalProps) {
+  const titleOverLimit = shareTitle.length > MAX_TITLE;
+  const descriptionOverLimit = shareDescription.length > MAX_DESCRIPTION;
+  const isFormInvalid = titleOverLimit || descriptionOverLimit || !shareTitle.trim();
   if (!isOpen) return null;
 
   const isUploading = ytState === 'uploading';
@@ -98,15 +108,33 @@ export function YouTubeShareModal({
               <label className="yt-modal-label" htmlFor="yt-title">Título *</label>
               <input
                 id="yt-title"
-                className="yt-modal-input"
+                className={`yt-modal-input${titleOverLimit ? ' yt-modal-input--error' : ''}`}
                 type="text"
                 value={shareTitle}
                 onChange={(e) => onTitleChange(e.target.value)}
                 placeholder="Título del video en YouTube"
-                maxLength={100}
                 required
               />
-              <span className="yt-modal-counter">{shareTitle.length}/100</span>
+              <span
+                className="yt-modal-counter"
+                style={
+                  titleOverLimit
+                    ? { color: 'var(--error, #ef4444)', fontWeight: 600 }
+                    : shareTitle.length >= TITLE_WARNING_THRESHOLD
+                    ? { color: 'var(--warning, #f59e0b)' }
+                    : undefined
+                }
+              >
+                {shareTitle.length}/{MAX_TITLE}
+              </span>
+              {titleOverLimit && (
+                <span className="form-error-msg">
+                  El título es demasiado largo (máx. {MAX_TITLE} caracteres).
+                </span>
+              )}
+              {titleError && !titleOverLimit && (
+                <span className="form-error-msg">{titleError}</span>
+              )}
             </div>
 
             {/* Descripción */}
@@ -114,14 +142,32 @@ export function YouTubeShareModal({
               <label className="yt-modal-label" htmlFor="yt-desc">Descripción</label>
               <textarea
                 id="yt-desc"
-                className="yt-modal-textarea"
+                className={`yt-modal-textarea${descriptionOverLimit ? ' yt-modal-input--error' : ''}`}
                 value={shareDescription}
                 onChange={(e) => onDescriptionChange(e.target.value)}
                 placeholder="Describe tu video (opcional)"
-                maxLength={MAX_DESCRIPTION}
                 rows={3}
               />
-              <span className="yt-modal-counter">{shareDescription.length}/{MAX_DESCRIPTION}</span>
+              <span
+                className="yt-modal-counter"
+                style={
+                  descriptionOverLimit
+                    ? { color: 'var(--error, #ef4444)', fontWeight: 600 }
+                    : shareDescription.length >= DESCRIPTION_WARNING_THRESHOLD
+                    ? { color: 'var(--warning, #f59e0b)' }
+                    : undefined
+                }
+              >
+                {shareDescription.length}/{MAX_DESCRIPTION}
+              </span>
+              {descriptionOverLimit && (
+                <span className="form-error-msg">
+                  La descripción es demasiado larga (máx. {MAX_DESCRIPTION} caracteres).
+                </span>
+              )}
+              {descriptionError && !descriptionOverLimit && (
+                <span className="form-error-msg">{descriptionError}</span>
+              )}
             </div>
 
             {/* Tags */}
@@ -163,7 +209,7 @@ export function YouTubeShareModal({
               <button type="button" className="btn btn-secondary" onClick={onClose}>
                 Cancelar
               </button>
-              <button type="submit" className="btn btn-yt-modal" disabled={!shareTitle.trim()}>
+              <button type="submit" className="btn btn-yt-modal" disabled={isFormInvalid}>
                 <span className="yt-btn-icon">▶</span>
                 Publicar en YouTube
               </button>
