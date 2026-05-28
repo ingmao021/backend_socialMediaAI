@@ -190,7 +190,10 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
           setShareDesc(suggestions.description);
         })
         .catch(() => {
-          // Si el backend no devuelve sugerencias, se mantiene el prompt como título
+          toast('No se pudieron cargar sugerencias de IA. Podés editarlos manualmente.', {
+            icon: 'ℹ️',
+            duration: 3000,
+          });
         })
         .finally(() => {
           setLoadingSuggestions(false);
@@ -291,7 +294,7 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
       onFavoriteChange?.(currentVideo.id, next);
     } catch {
       setIsFavorite(!next);
-      toast.error('No se pudo actualizar favorito');
+      toast.error('No se pudo guardar el favorito. El servidor no está disponible.');
     } finally {
       setTogglingFavorite(false);
     }
