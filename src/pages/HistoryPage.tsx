@@ -103,7 +103,7 @@ export function HistoryPage() {
           </button>
         ))}
 
-        <div className="history-date-filter">
+        <div className="history-date-filter" style={{ marginLeft: 'auto' }}>
           <button
             className={`history-filter-btn history-calendar-btn${dateFilter ? ' history-filter-btn--active' : ''}`}
             onClick={() => setShowDatePicker((v) => !v)}
@@ -139,7 +139,6 @@ export function HistoryPage() {
           className="btn btn-secondary btn-sm"
           onClick={() => loadVideos(page)}
           disabled={loading}
-          style={{ marginLeft: 'auto' }}
         >
           {loading ? <div className="spinner spinner-sm" /> : '↻ Recargar'}
         </button>
