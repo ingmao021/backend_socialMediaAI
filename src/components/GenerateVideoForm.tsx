@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { GenerateVideoRequest } from '../types/video.types';
+import { useVoiceInput } from '../hooks/useVoiceInput';
 
 interface GenerateVideoFormProps {
   onGenerate: (request: GenerateVideoRequest) => Promise<void>;
@@ -25,6 +26,9 @@ export function GenerateVideoForm({
   const [duration, setDuration] = useState<GenerateVideoRequest['durationSeconds']>(4);
   const [loading, setLoading] = useState(false);
 
+  const { isSupported: voiceSupported, isListening, startListening, stopListening } =
+    useVoiceInput({ onTranscript: setPrompt, currentText: prompt });
+
   const canSubmit =
     !disabled &&
     !quotaReached &&
@@ -49,13 +53,27 @@ export function GenerateVideoForm({
     <div className="generate-section glass-card">
       <form className="generate-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label" htmlFor="video-prompt">
-            Describe tu video
-          </label>
+          <div className="form-label-row">
+            <label className="form-label" htmlFor="video-prompt">
+              Describe tu video
+            </label>
+            {voiceSupported && (
+              <button
+                type="button"
+                className={`btn-mic${isListening ? ' btn-mic--active' : ''}`}
+                onClick={isListening ? stopListening : startListening}
+                disabled={disabled || quotaReached}
+                title={isListening ? 'Detener grabación' : 'Dictar por voz'}
+                aria-label={isListening ? 'Detener grabación' : 'Dictar por voz'}
+              >
+                {isListening ? '⏹' : '🎤'}
+              </button>
+            )}
+          </div>
           <textarea
             id="video-prompt"
-            className="form-textarea"
-            placeholder="Ej: Un gato astronauta flotando en el espacio con la Tierra de fondo, estilo cinematográfico…"
+            className={`form-textarea${isListening ? ' form-textarea--listening' : ''}`}
+            placeholder={isListening ? 'Escuchando…' : 'Ej: Un gato astronauta flotando en el espacio con la Tierra de fondo, estilo cinematográfico…'}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             maxLength={MAX_PROMPT_LENGTH}

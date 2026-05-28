@@ -166,6 +166,11 @@ img, video { max-width: 100%; display: block; }
    5. Form Controls
    ======================================== */
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 .form-label {
   font-size: 0.85rem;
@@ -216,6 +221,43 @@ img, video { max-width: 100%; display: block; }
   color: var(--error, #ef4444);
   margin-top: 0.25rem;
   display: block;
+}
+
+.btn-mic {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.btn-mic:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.btn-mic:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-mic--active {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18); }
+  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.06); }
+}
+.form-textarea--listening {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
 }
 
 /* ========================================
