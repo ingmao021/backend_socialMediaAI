@@ -678,7 +678,7 @@ img, video { max-width: 100%; display: block; }
   transition: all 0.15s;
 }
 .history-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(255, 255, 255);
   color: var(--text-primary);
 }
 .history-filter-btn--active {
