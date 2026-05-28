@@ -42,6 +42,8 @@ export function HistoryPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>('ALL');
+  const [dateFilter, setDateFilter] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const loadVideos = useCallback(async (p: number) => {
     setLoading(true);
@@ -75,8 +77,11 @@ export function HistoryPage() {
   };
 
   const allVideos = videosData?.content ?? [];
-  const filteredVideos =
-    filter === 'ALL' ? allVideos : allVideos.filter((v) => v.status === filter);
+  const filteredVideos = allVideos.filter((v) => {
+    const statusMatch = filter === 'ALL' || v.status === filter;
+    const dateMatch = !dateFilter || v.createdAt.substring(0, 10) === dateFilter;
+    return statusMatch && dateMatch;
+  });
   const totalPages = videosData?.totalPages ?? 0;
   const grouped = groupByDate(filteredVideos);
 
@@ -97,6 +102,39 @@ export function HistoryPage() {
             {STATUS_LABELS[f]}
           </button>
         ))}
+
+        <div className="history-date-filter">
+          <button
+            className={`history-filter-btn history-calendar-btn${dateFilter ? ' history-filter-btn--active' : ''}`}
+            onClick={() => setShowDatePicker((v) => !v)}
+            title={dateFilter ? `Filtrando: ${dateFilter}` : 'Filtrar por fecha'}
+          >
+            📅{dateFilter ? ` ${dateFilter}` : ''}
+          </button>
+          {dateFilter && (
+            <button
+              className="history-clear-date"
+              onClick={() => { setDateFilter(''); setShowDatePicker(false); }}
+              title="Quitar filtro de fecha"
+            >
+              ✕
+            </button>
+          )}
+          {showDatePicker && (
+            <input
+              type="date"
+              className="history-date-input"
+              value={dateFilter}
+              onChange={(e) => {
+                setDateFilter(e.target.value);
+                setShowDatePicker(false);
+              }}
+              autoFocus
+              onBlur={() => setShowDatePicker(false)}
+            />
+          )}
+        </div>
+
         <button
           className="btn btn-secondary btn-sm"
           onClick={() => loadVideos(page)}
@@ -115,9 +153,13 @@ export function HistoryPage() {
         <div className="empty-state">
           <div className="empty-state-icon">📋</div>
           <p className="empty-state-text">
-            {filter === 'ALL'
-              ? 'No hay videos en tu historial.'
-              : `No hay videos con estado "${STATUS_LABELS[filter]}".`}
+            {dateFilter && filter !== 'ALL'
+              ? `No hay videos "${STATUS_LABELS[filter]}" el ${dateFilter}.`
+              : dateFilter
+              ? `No hay videos el ${dateFilter}.`
+              : filter !== 'ALL'
+              ? `No hay videos con estado "${STATUS_LABELS[filter]}".`
+              : 'No hay videos en tu historial.'}
           </p>
         </div>
       ) : (
