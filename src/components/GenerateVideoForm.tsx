@@ -34,7 +34,7 @@ export function GenerateVideoForm({
     !quotaReached &&
     !loading &&
     prompt.trim().length > 0 &&
-    prompt.length <= MAX_PROMPT_LENGTH;
+    prompt.length < MAX_PROMPT_LENGTH;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
