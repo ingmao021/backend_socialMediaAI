@@ -157,6 +157,29 @@ img, video { max-width: 100%; display: block; }
   border-color: rgba(255, 255, 255, 0.3);
   color: var(--text-primary);
 }
+.btn-favorite {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+.btn-favorite:hover:not(:disabled) {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+.btn-favorite--active {
+  color: #f59e0b;
+}
+.btn-favorite:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
 .btn-block { width: 100%; }

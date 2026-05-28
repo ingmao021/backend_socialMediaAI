@@ -10,6 +10,7 @@ export interface VideoResponse {
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
+  isFavorite?: boolean;
 }
 
 export interface VideoStatusResponse {

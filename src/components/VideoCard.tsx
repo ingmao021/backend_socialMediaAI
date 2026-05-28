@@ -3,6 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { VideoPlayer } from './VideoPlayer';
 import { videoService } from '../services/videoService';
+import { favoriteService } from '../services/favoriteService';
 import { youtubeService } from '../services/youtubeService';
 import { YouTubeShareModal } from './YouTubeShareModal';
 import { useVideoPolling } from '../hooks/useVideoPolling';
@@ -13,6 +14,7 @@ interface VideoCardProps {
   video: VideoResponse;
   onDelete: (videoId: string) => void;
   onVideoCompleted?: (videoId: string) => void;
+  onFavoriteChange?: (videoId: string, isFavorite: boolean) => void;
 }
 
 const STATUS_CONFIG = {
@@ -44,8 +46,10 @@ const PRIVACY_LABEL: Record<YouTubePrivacyStatus, string> = {
   PRIVATE: '🔒 Privado',
 };
 
-export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps) {
+export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange }: VideoCardProps) {
   const [currentVideo, setCurrentVideo] = useState<VideoResponse>(video);
+  const [isFavorite, setIsFavorite] = useState<boolean>(video.isFavorite ?? false);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
 
   // ── AÑADIDO: estado YouTube ──────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
@@ -271,6 +275,28 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
   };
   // ─────────────────────────────────────────────────────────────────────
 
+  const handleToggleFavorite = async () => {
+    if (togglingFavorite) return;
+    setTogglingFavorite(true);
+    const next = !isFavorite;
+    setIsFavorite(next);
+    try {
+      if (next) {
+        await favoriteService.addFavorite(currentVideo.id);
+        toast.success('Agregado a favoritos');
+      } else {
+        await favoriteService.removeFavorite(currentVideo.id);
+        toast.success('Eliminado de favoritos');
+      }
+      onFavoriteChange?.(currentVideo.id, next);
+    } catch {
+      setIsFavorite(!next);
+      toast.error('No se pudo actualizar favorito');
+    } finally {
+      setTogglingFavorite(false);
+    }
+  };
+
   const handleCopyLink = async () => {
     if (!currentVideo.signedUrl) return;
     try {
@@ -391,6 +417,15 @@ export function VideoCard({ video, onDelete, onVideoCompleted }: VideoCardProps)
               )
             )}
             {/* ─────────────────────────────────────────────── */}
+            <button
+              className={`btn-favorite${isFavorite ? ' btn-favorite--active' : ''}`}
+              onClick={handleToggleFavorite}
+              disabled={togglingFavorite}
+              title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            >
+              {isFavorite ? '★' : '☆'}
+            </button>
             {isCompleted && currentVideo.signedUrl && (
               <button
                 className="btn btn-copy-link btn-sm"

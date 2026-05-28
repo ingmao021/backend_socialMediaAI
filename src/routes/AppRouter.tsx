@@ -6,6 +6,7 @@ import { DashboardPage } from '../pages/DashboardPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import { YouTubeConnectedPage } from '../pages/YouTubeConnectedPage';
 import { HistoryPage } from '../pages/HistoryPage';
+import { FavoritesPage } from '../pages/FavoritesPage';
 export function AppRouter() {
   return (
     <Routes>
@@ -18,6 +19,7 @@ export function AppRouter() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
