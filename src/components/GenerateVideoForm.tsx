@@ -13,8 +13,8 @@ interface GenerateVideoFormProps {
 }
 
 const DURATIONS: Array<GenerateVideoRequest['durationSeconds']> = [4, 6, 8];
-const MAX_PROMPT_LENGTH = 200;
-const PROMPT_WARNING_THRESHOLD = 180;
+const MAX_PROMPT_LENGTH = 500;
+const PROMPT_WARNING_THRESHOLD = 480;
 
 export function GenerateVideoForm({
   onGenerate,
