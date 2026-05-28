@@ -9,6 +9,9 @@ export type YouTubeExportStatus = 'PENDING' | 'UPLOADING' | 'COMPLETED' | 'FAILE
 /** Privacidad del video en YouTube */
 export type YouTubePrivacyStatus = 'PRIVATE' | 'UNLISTED' | 'PUBLIC';
 
+/** Estado de sincronización del video publicado contra YouTube Data API */
+export type YouTubeSyncStatus = 'UNKNOWN' | 'ACTIVE' | 'DELETED' | 'UNAVAILABLE';
+
 /** Respuesta de GET /api/youtube/connection */
 export interface YouTubeConnectionResponse {
   connected: boolean;
@@ -29,6 +32,16 @@ export interface YouTubeExportRequest {
   description: string | null;
   tags: string | null;
   privacyStatus: YouTubePrivacyStatus;
+}
+
+/** Respuesta de GET /api/videos/{videoId}/youtube/status */
+export interface YouTubeVideoStatusResponse {
+  published: boolean;
+  youtubeVideoId: string | null;
+  youtubeVideoUrl: string | null;
+  publishedAt: string | null;
+  privacy: YouTubePrivacyStatus | null;
+  syncStatus: YouTubeSyncStatus;
 }
 
 /** Respuesta de POST /api/videos/{videoId}/youtube/export y GET /api/youtube/exports/{jobId} */

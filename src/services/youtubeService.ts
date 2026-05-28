@@ -4,6 +4,7 @@ import type {
   YouTubeConnectionResponse,
   YouTubeExportJobResponse,
   YouTubeExportRequest,
+  YouTubeVideoStatusResponse,
 } from '../types/youtube.types';
 
 /**
@@ -60,6 +61,17 @@ export const youtubeService = {
   async getExportJob(jobId: string): Promise<YouTubeExportJobResponse> {
     const { data } = await apiClient.get<YouTubeExportJobResponse>(
       `/api/youtube/exports/${jobId}`,
+    );
+    return data;
+  },
+
+  /**
+   * Consulta el estado de publicación de un video en YouTube (fuente de verdad en BD).
+   * Incluye sincronización con YouTube Data API (caché de 10 min en backend).
+   */
+  async getVideoStatus(videoId: string): Promise<YouTubeVideoStatusResponse> {
+    const { data } = await apiClient.get<YouTubeVideoStatusResponse>(
+      `/api/videos/${videoId}/youtube/status`,
     );
     return data;
   },

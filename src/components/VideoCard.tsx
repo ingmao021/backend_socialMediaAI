@@ -8,7 +8,7 @@ import { youtubeService } from '../services/youtubeService';
 import { YouTubeShareModal } from './YouTubeShareModal';
 import { useVideoPolling } from '../hooks/useVideoPolling';
 import type { VideoResponse } from '../types/video.types';
-import type { YouTubePrivacyStatus } from '../types/youtube.types';
+import type { YouTubePrivacyStatus, YouTubeSyncStatus } from '../types/youtube.types';
 
 interface VideoCardProps {
   video: VideoResponse;
@@ -37,6 +37,7 @@ type YouTubeShareState = 'idle' | 'form' | 'uploading' | 'done' | 'error';
 interface PublishedInfo {
   url: string;
   privacy: YouTubePrivacyStatus;
+  syncStatus?: YouTubeSyncStatus;
 }
 // ─────────────────────────────────────────────────────────────────────
 
@@ -64,6 +65,8 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   /** Persiste info del video publicado en YouTube incluso tras cerrar el modal */
   const [publishedInfo, setPublishedInfo] = useState<PublishedInfo | null>(null);
+  /** Estado de sincronización real del video contra YouTube Data API */
+  const [ytSyncStatus, setYtSyncStatus] = useState<YouTubeSyncStatus>('UNKNOWN');
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // ─────────────────────────────────────────────────────────────────────
 
@@ -80,18 +83,46 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
   }, []);
   // ─────────────────────────────────────────────────────────────────────
 
-  // ── AÑADIDO: recuperar info de YouTube al recargar ────────────────
+  // ── Carga el estado real de publicación YouTube desde backend ────────
   useEffect(() => {
-    const stored = localStorage.getItem(`yt-published-${currentVideo.id}`);
-    if (stored) {
+    if (currentVideo.status !== 'COMPLETED') return;
+
+    const loadYouTubeStatus = async () => {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPublishedInfo(JSON.parse(stored));
+        const status = await youtubeService.getVideoStatus(currentVideo.id);
+
+        if (!status.published) {
+          setPublishedInfo(null);
+          setYtSyncStatus('UNKNOWN');
+          localStorage.removeItem(`yt-published-${currentVideo.id}`);
+          return;
+        }
+
+        const info: PublishedInfo = {
+          url: status.youtubeVideoUrl!,
+          privacy: status.privacy!,
+          syncStatus: status.syncStatus,
+        };
+        setPublishedInfo(info);
+        setYtSyncStatus(status.syncStatus);
+        localStorage.setItem(`yt-published-${currentVideo.id}`, JSON.stringify(info));
       } catch {
-        localStorage.removeItem(`yt-published-${currentVideo.id}`);
+        // Fallback a localStorage si la API no responde
+        const stored = localStorage.getItem(`yt-published-${currentVideo.id}`);
+        if (stored) {
+          try {
+            const cached: PublishedInfo = JSON.parse(stored);
+            setPublishedInfo(cached);
+            setYtSyncStatus(cached.syncStatus ?? 'ACTIVE');
+          } catch {
+            localStorage.removeItem(`yt-published-${currentVideo.id}`);
+          }
+        }
       }
-    }
-  }, [currentVideo.id]);
+    };
+
+    loadYouTubeStatus();
+  }, [currentVideo.id, currentVideo.status]);
   // ─────────────────────────────────────────────────────────────────
 
   useVideoPolling({
@@ -244,8 +275,28 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
       startJobPolling(job.jobId);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        const code = (err.response?.data as { code?: string })?.code;
-        if (code === 'YOUTUBE_NOT_CONNECTED') {
+        const data = err.response?.data as { code?: string; message?: string } | undefined;
+        const code = data?.code;
+        if (code === 'YOUTUBE_ALREADY_PUBLISHED') {
+          toast.error(data?.message ?? 'Este video ya está publicado en YouTube');
+          // Resincronizar estado — puede que el caché estuviera desactualizado
+          try {
+            const status = await youtubeService.getVideoStatus(currentVideo.id);
+            if (status.published) {
+              const info: PublishedInfo = {
+                url: status.youtubeVideoUrl!,
+                privacy: status.privacy!,
+                syncStatus: status.syncStatus,
+              };
+              setPublishedInfo(info);
+              setYtSyncStatus(status.syncStatus);
+              localStorage.setItem(`yt-published-${currentVideo.id}`, JSON.stringify(info));
+            }
+          } catch { /* mantener estado actual */ }
+          setModalOpen(false);
+          setYtState('idle');
+          return;
+        } else if (code === 'YOUTUBE_NOT_CONNECTED') {
           toast.error('Conecta tu cuenta de YouTube primero');
         } else if (code === 'VIDEO_NOT_READY_FOR_EXPORT') {
           toast.error('El video no está listo para exportar');
@@ -262,12 +313,10 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
   /** Cierra el modal. Si la publicación fue exitosa, persiste la info en la card. */
   const handleModalClose = () => {
     if (ytState === 'done' && ytUrl) {
-      const info = { url: ytUrl, privacy: sharePrivacy };
+      const info: PublishedInfo = { url: ytUrl, privacy: sharePrivacy, syncStatus: 'ACTIVE' };
       setPublishedInfo(info);
-      localStorage.setItem(
-        `yt-published-${currentVideo.id}`,
-        JSON.stringify(info)   // ← ahora info sí existe
-      );
+      setYtSyncStatus('ACTIVE');
+      localStorage.setItem(`yt-published-${currentVideo.id}`, JSON.stringify(info));
     }
     if (pollingRef.current) clearInterval(pollingRef.current);
     pollingRef.current = null;
@@ -378,14 +427,26 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
             {statusCfg.label}
           </div>
 
-          {/* ── AÑADIDO: Badge de publicación en YouTube ── */}
-          {publishedInfo && (
+          {/* ── Badge de publicación en YouTube ── */}
+          {publishedInfo && ytSyncStatus === 'ACTIVE' && (
             <div className="yt-published-badge">
               <span className="yt-published-dot">▶</span>
               <span className="yt-published-label">Publicado en YouTube</span>
               <span className="yt-published-privacy">
                 {PRIVACY_LABEL[publishedInfo.privacy]}
               </span>
+            </div>
+          )}
+          {publishedInfo && ytSyncStatus === 'DELETED' && (
+            <div className="yt-published-badge yt-published-badge--deleted">
+              <span className="yt-published-dot">⚠</span>
+              <span className="yt-published-label">Eliminado de YouTube</span>
+            </div>
+          )}
+          {publishedInfo && ytSyncStatus === 'UNAVAILABLE' && (
+            <div className="yt-published-badge yt-published-badge--deleted">
+              <span className="yt-published-dot">⚠</span>
+              <span className="yt-published-label">No disponible en YouTube</span>
             </div>
           )}
           {/* ─────────────────────────── */}
@@ -405,10 +466,9 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
           </div>
 
           <div className="video-card-actions">
-            {/* ── AÑADIDO: botón YouTube con estado contextual ── */}
+            {/* ── Botón YouTube con estado contextual ── */}
             {isCompleted && (
-              publishedInfo ? (
-                // Video ya publicado → "Ver en YouTube"
+              publishedInfo && ytSyncStatus === 'ACTIVE' ? (
                 <a
                   href={publishedInfo.url}
                   target="_blank"
@@ -419,7 +479,6 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
                   Ver en YouTube
                 </a>
               ) : (
-                // Video no publicado → "Compartir en YouTube"
                 <button
                   className="btn btn-yt btn-sm"
                   onClick={handleShareClick}
@@ -427,6 +486,8 @@ export function VideoCard({ video, onDelete, onVideoCompleted, onFavoriteChange 
                 >
                   {checkingConnection ? (
                     <span className="spinner spinner-sm" />
+                  ) : ytSyncStatus === 'DELETED' || ytSyncStatus === 'UNAVAILABLE' ? (
+                    'Volver a publicar'
                   ) : (
                     'Compartir en YouTube'
                   )}
