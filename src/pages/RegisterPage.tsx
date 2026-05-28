@@ -5,8 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import axios from 'axios';
 import type { ApiError } from '../types/api.types';
 
-const MAX_NAME_LENGTH = 150;
-const NAME_WARNING_THRESHOLD = 130;
+const MAX_NAME_LENGTH = 50;
+const NAME_WARNING_THRESHOLD = 70;
 
 export function RegisterPage() {
   const { register } = useAuth();
