@@ -17,7 +17,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(0);
   const [loadingList, setLoadingList] = useState(true);
 
-  const quotaReached = (user?.videosGenerated ?? 0) >= (user?.videosLimit ?? 2);
+  const quotaReached = (user?.videosGenerated ?? 0) >= (user?.videosLimit ?? 5);
 
   // Load video list
   const loadVideos = useCallback(
@@ -129,7 +129,7 @@ async function handleGenerate(request: GenerateVideoRequest) {
         disabled={loadingList}
         quotaReached={quotaReached}
         videosGenerated={user?.videosGenerated ?? 0}
-        videosLimit={user?.videosLimit ?? 2}
+        videosLimit={user?.videosLimit ?? 5}
       />
 
       <div className="video-list-header">
